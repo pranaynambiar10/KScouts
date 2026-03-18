@@ -1,0 +1,230 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==============================
+   GLOBAL ANIMATIONS & EFFECTS
+   ============================== */
+
+/* Floating Particles */
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: translateY(-30px) rotate(180deg);
+        opacity: 0.8;
+    }
+}
+
+@keyframes floatSlow {
+
+    0%,
+    100% {
+        transform: translateY(0px) translateX(0px);
+    }
+
+    25% {
+        transform: translateY(-20px) translateX(10px);
+    }
+
+    50% {
+        transform: translateY(-10px) translateX(-10px);
+    }
+
+    75% {
+        transform: translateY(-25px) translateX(5px);
+    }
+}
+
+/* Pulse Glow Effect */
+@keyframes pulseGlow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 5px rgba(220, 38, 38, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(220, 38, 38, 0.6), 0 0 50px rgba(220, 38, 38, 0.2);
+    }
+}
+
+@keyframes pulseGlowGold {
+
+    0%,
+    100% {
+        box-shadow: 0 0 5px rgba(234, 179, 8, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(234, 179, 8, 0.6), 0 0 50px rgba(234, 179, 8, 0.2);
+    }
+}
+
+@keyframes pulseGlowGreen {
+
+    0%,
+    100% {
+        box-shadow: 0 0 5px rgba(16, 185, 129, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(16, 185, 129, 0.6), 0 0 50px rgba(16, 185, 129, 0.2);
+    }
+}
+
+/* Shimmer / Scan Line */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Text Gradient Animation */
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Subtle Bounce */
+@keyframes subtleBounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+/* Border Glow Pulse */
+@keyframes borderPulse {
+
+    0%,
+    100% {
+        border-color: rgba(220, 38, 38, 0.2);
+    }
+
+    50% {
+        border-color: rgba(220, 38, 38, 0.6);
+    }
+}
+
+/* Typing cursor blink */
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+/* Utility Classes */
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-slow {
+    animation: floatSlow 8s ease-in-out infinite;
+}
+
+.animate-float-delay-1 {
+    animation: float 7s ease-in-out 1s infinite;
+}
+
+.animate-float-delay-2 {
+    animation: float 5s ease-in-out 2s infinite;
+}
+
+.animate-float-delay-3 {
+    animation: floatSlow 9s ease-in-out 0.5s infinite;
+}
+
+.animate-pulse-glow {
+    animation: pulseGlow 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow-gold {
+    animation: pulseGlowGold 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow-green {
+    animation: pulseGlowGreen 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite;
+}
+
+.animate-gradient {
+    background-size: 200% 200%;
+    animation: gradientShift 4s ease infinite;
+}
+
+.animate-subtle-bounce {
+    animation: subtleBounce 2s ease-in-out infinite;
+}
+
+.animate-border-pulse {
+    animation: borderPulse 2s ease-in-out infinite;
+}
+
+.animate-blink {
+    animation: blink 1s step-end infinite;
+}
+
+/* Smooth scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #111;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #dc2626;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #ef4444;
+}
+
+/* Glass morphism utility */
+.glass {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
