@@ -30,6 +30,14 @@ def my_events(current_user: models.User = Depends(get_current_user), db: Session
     events = db.query(models.Event).filter(models.Event.creator_id == current_user.id).all()
     return events
 
+@router.get("/my/applications", response_model=list[schemas.EventApplicationOut])
+def my_applications(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Get all applications by the current player."""
+    applications = db.query(models.EventApplication).filter(
+        models.EventApplication.player_id == current_user.id
+    ).all()
+    return applications
+
 @router.get("/{event_id}", response_model=schemas.EventOut)
 def get_event(event_id: int, db: Session = Depends(get_db)):
     """Get event details by ID."""
@@ -80,13 +88,7 @@ def apply_to_event(event_id: int, current_user: models.User = Depends(require_ro
     db.refresh(application)
     return application
 
-@router.get("/my/applications", response_model=list[schemas.EventApplicationOut])
-def my_applications(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    """Get all applications by the current player."""
-    applications = db.query(models.EventApplication).filter(
-        models.EventApplication.player_id == current_user.id
-    ).all()
-    return applications
+# NOTE: /my/applications is already registered above /{event_id} to prevent route shadowing
 
 @router.get("/{event_id}/applications", response_model=list[schemas.EventApplicationWithDetails])
 def get_event_applications(event_id: int, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
