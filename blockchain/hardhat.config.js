@@ -2,7 +2,7 @@ require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY || "0x" + "0".repeat(64); // dummy key for local
-const MUMBAI_RPC_URL = process.env.MUMBAI_RPC_URL || "https://rpc-mumbai.maticvigil.com";
+const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL || "https://rpc.sepolia.org";
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -20,16 +20,16 @@ module.exports = {
     localhost: {
       url: "http://127.0.0.1:8545",
     },
-    // Polygon Mumbai testnet (Phase 8)
-    mumbai: {
-      url: MUMBAI_RPC_URL,
+    // Ethereum Sepolia testnet
+    sepolia: {
+      url: SEPOLIA_RPC_URL,
       accounts: [PRIVATE_KEY],
-      chainId: 80001,
+      chainId: 11155111,
     },
   },
   etherscan: {
     apiKey: {
-      polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
+      sepolia: process.env.ETHERSCAN_API_KEY || "",
     },
   },
 };

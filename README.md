@@ -4,7 +4,7 @@
 
 ![KScouts Banner](frontend/public/kscouts_logo.png) <!-- Update with actual banner if available -->
 
-KScouts is a modern platform connecting young football prospects with scouts, academies, and clubs. To prevent fraud and validate player trial attendance, KScouts features a **manual certificate upload with SHA-256 hash anchoring on Polygon for public verification.**
+KScouts is a modern platform connecting young football prospects with scouts, academies, and clubs. To prevent fraud and validate player trial attendance, KScouts features a **manual certificate upload with SHA-256 hash anchoring on Ethereum Sepolia for public verification.**
 
 ## 📋 Table of Contents
 1. [Problem Statement](#-problem-statement)
@@ -15,7 +15,7 @@ KScouts is a modern platform connecting young football prospects with scouts, ac
 6. [Certificate Verification Flow](#-certificate-verification-flow)
 7. [Screenshots](#-screenshots)
 8. [Local Development Setup](#%EF%B8%8F-local-development-setup)
-9. [Testnet Setup (Polygon Amoy)](#-testnet-setup-polygon-amoy)
+9. [Testnet Setup (Ethereum Sepolia)](#-testnet-setup-ethereum-sepolia)
 10. [Deployment Guide](#-deployment-guide)
 11. [Known Limitations](#-known-limitations)
 
@@ -47,20 +47,20 @@ KScouts solves this by assigning every official achievement certificate a unique
 ## 🛠 Tech Stack
 - **Frontend**: React, Vite, Tailwind CSS, Framer Motion
 - **Backend**: FastAPI, SQLAlchemy, PostgreSQL, Python-dotenv
-- **Blockchain**: Solidity, Web3.py, Hardhat (Local testing) / Polygon Amoy (Testnet)
+- **Blockchain**: Solidity, Web3.py, Hardhat (Local testing) / Ethereum Sepolia (Testnet)
 
 ---
 
 ## 🏗 System Architecture
 KScouts uses a hybrid architecture for maximum efficiency and cost-effectiveness:
 - **PostgreSQL (Database):** Stores all traditional application data (user accounts, player stats, event details, and application states).
-- **Blockchain (Polygon Amoy):** Strictly stores **only** the 64-character SHA-256 hashes of officially issued certificates. No raw files or personal data are stored on-chain, keeping gas costs minimal and privacy intact.
+- **Blockchain (Ethereum Sepolia):** Strictly stores **only** the 64-character SHA-256 hashes of officially issued certificates. No raw files or personal data are stored on-chain, keeping gas costs minimal and privacy intact.
 
 ---
 
 ## 🔗 Certificate Verification Flow
 1. **Issuance (Off-chain):** An administrator uses `generate_demo_certificate.py` to create a PDF certificate for a player.
-2. **Anchoring (On-chain):** The script computes the SHA-256 hash of the PDF and sends a transaction to the `CertificateRegistry` smart contract on Polygon Amoy to permanently store the hash.
+2. **Anchoring (On-chain):** The script computes the SHA-256 hash of the PDF and sends a transaction to the `CertificateRegistry` smart contract on Ethereum Sepolia to permanently store the hash.
 3. **Upload (Off-chain):** The player uploads their PDF certificate to their KScouts profile.
 4. **Verification (Hybrid):** The FastAPI backend intercepts the file, hashes it locally, and queries the blockchain. If the hash exists in the smart contract registry, the certificate is instantly marked as **Verified** ✅ in the database.
 
@@ -137,17 +137,17 @@ To test certificate verification completely locally:
 
 ---
 
-## 🌐 Testnet Setup (Polygon Amoy)
-For a live presentation, KScouts should be pointed to the live Polygon Amoy test network.
+## 🌐 Testnet Setup (Ethereum Sepolia)
+For a live presentation, KScouts should be pointed to the live Ethereum Sepolia test network.
 
-1. Get an API key from an RPC provider (e.g., Alchemy or Infura) for the Polygon Amoy network.
-2. Ensure your administrator wallet has Amoy test MATIC (from a faucet).
-3. Update `blockchain/hardhat.config.js` to include the Amoy network credentials.
-4. Deploy to Amoy: `npx hardhat run scripts/deploy.js --network amoy`.
+1. Get an API key from an RPC provider (e.g., Alchemy or Infura) for Ethereum Sepolia.
+2. Ensure your administrator wallet has Sepolia test ETH (from a faucet, e.g. [sepoliafaucet.com](https://sepoliafaucet.com)).
+3. Fill in `blockchain/.env` with your `PRIVATE_KEY` and `SEPOLIA_RPC_URL`.
+4. Deploy to Sepolia: `npx hardhat run scripts/deploy.js --network sepolia`.
 5. Update your backend `.env`:
    ```env
-   BLOCKCHAIN_RPC_URL=https://polygon-amoy.g.alchemy.com/v2/YOUR_API_KEY
-   CONTRACT_ADDRESS=your_amoy_contract_address
+   BLOCKCHAIN_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/YOUR_API_KEY
+   CONTRACT_ADDRESS=your_sepolia_contract_address
    ```
 
 ---
@@ -159,7 +159,7 @@ For a live presentation, KScouts should be pointed to the live Polygon Amoy test
 2. Root Directory: `backend`
 3. Build Command: `pip install -r requirements.txt`
 4. Start Command: `uvicorn main:app --host 0.0.0.0 --port 10000`
-5. Add all `.env` variables from your local setup (using remote PostgreSQL and Amoy credentials).
+5. Add all `.env` variables from your local setup (using remote PostgreSQL and Sepolia credentials).
 
 ### Frontend (Vercel)
 1. Import the repository into Vercel.
@@ -173,7 +173,7 @@ For a live presentation, KScouts should be pointed to the live Polygon Amoy test
 - The admin backend is currently minimal; generating robust statistics and manual user override features are future scope additions.
 - The blockchain is strictly used to anchor certificate hashes. It does not store user profiles or monetary transactions.
 - Certificate generation is currently triggered manually by admins via a Python script (`generate_demo_certificate.py`), not yet automated through an admin GUI. 
-- Local blockchain testing works natively via Hardhat; live testnet deployment requires configuration over Polygon Amoy.
+- Local blockchain testing works natively via Hardhat; live testnet deployment requires configuration over Ethereum Sepolia.
 
 ---
 *Built with ❤️ for grassroots football development.*

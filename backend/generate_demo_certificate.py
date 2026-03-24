@@ -1,24 +1,23 @@
 """
 generate_test_cert.py
-Generates a new test certificate PDF, prints its SHA-256 hash,
-and stores the hash in the CertificateRegistry smart contract
-on the local Hardhat node.
+Generates new test certificate PDFs for multiple players, prints their SHA-256 hashes,
+and stores the hashes in the CertificateRegistry smart contract
+on the configured blockchain (Sepolia or local).
 """
 import sys
-# Force UTF-8 on stdout so emoji/special chars do not crash on Windows
 import io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-
 import hashlib
 import json
+import os
 from pathlib import Path
 from datetime import datetime
 
-# ── 1. Generate PDF ──────────────────────────────────────────────
-from fpdf import FPDF
+# Force UTF-8 on stdout so emoji/special chars do not crash on Windows
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
-output_pdf = Path("../frontend/public/demo_certificate_test.pdf")
-output_pdf.parent.mkdir(parents=True, exist_ok=True)
+from fpdf import FPDF
+from web3 import Web3
+from dotenv import load_dotenv
 
 class PDF(FPDF):
     def header(self):
@@ -29,120 +28,156 @@ class PDF(FPDF):
         self.line(10, 20, 200, 20)
         self.ln(6)
 
-pdf = PDF()
-pdf.add_page()
+def generate_and_register(w3, contract, account, player_info):
+    filename = f"demo_certificate_{player_info['file_suffix']}.pdf"
+    output_pdf = Path(f"../frontend/public/{filename}")
+    output_pdf.parent.mkdir(parents=True, exist_ok=True)
+    
+    # ── 1. Generate PDF ──────────────────────────────────────────────
+    pdf = PDF()
+    pdf.add_page()
 
-# Title
-pdf.set_font("Arial", "B", 26)
-pdf.set_text_color(30, 60, 120)
-pdf.cell(0, 18, "CERTIFICATE OF ACHIEVEMENT", ln=True, align="C")
+    # Title
+    pdf.set_font("Arial", "B", 26)
+    pdf.set_text_color(30, 60, 120)
+    pdf.cell(0, 18, "CERTIFICATE OF ACHIEVEMENT", ln=True, align="C")
 
-# Decorative line
-pdf.set_draw_color(200, 160, 30)
-pdf.set_line_width(1.2)
-pdf.line(30, pdf.get_y(), 180, pdf.get_y())
-pdf.ln(10)
+    # Decorative line
+    pdf.set_draw_color(200, 160, 30)
+    pdf.set_line_width(1.2)
+    pdf.line(30, pdf.get_y(), 180, pdf.get_y())
+    pdf.ln(10)
 
-# Body
-pdf.set_font("Arial", "", 14)
-pdf.set_text_color(40, 40, 40)
-pdf.multi_cell(0, 9,
-    "This certifies that\n\n"
-    "ALEX TEST (alex.test@kscouts.io)\n\n"
-    "has been scouted and officially evaluated as part of the\n"
-    "KScouts U18 Regional Trials - Spring 2025 Season.\n\n"
-    "Position: Central Midfielder | Rating: 87/100",
-    align="C"
-)
-pdf.ln(8)
+    # Body
+    pdf.set_font("Arial", "", 14)
+    pdf.set_text_color(40, 40, 40)
+    
+    body_text = (
+        "This certifies that\n\n"
+        f"{player_info['name'].upper()} ({player_info['email']})\n\n"
+        "has been scouted and officially evaluated as part of the\n"
+        f"{player_info['event']}.\n\n"
+        f"Position: {player_info['position']} | Rating: {player_info['rating']}/100"
+    )
+    
+    pdf.multi_cell(0, 9, body_text, align="C")
+    pdf.ln(8)
 
-# Date
-pdf.set_font("Arial", "I", 11)
-pdf.set_text_color(100, 100, 100)
-pdf.cell(0, 8, f"Issued: {datetime.now().strftime('%d %B %Y')}", ln=True, align="C")
+    # Date
+    pdf.set_font("Arial", "I", 11)
+    pdf.set_text_color(100, 100, 100)
+    pdf.cell(0, 8, f"Issued: {datetime.now().strftime('%d %B %Y')}", ln=True, align="C")
 
-# Footer line
-pdf.set_draw_color(30, 120, 255)
-pdf.set_line_width(0.5)
-pdf.line(10, 270, 200, 270)
-pdf.set_y(272)
-pdf.set_font("Arial", "I", 9)
-pdf.cell(0, 6, "KScouts Blockchain-Verified Certificate. Do not alter this document.", align="C")
+    # Footer line
+    pdf.set_draw_color(30, 120, 255)
+    pdf.set_line_width(0.5)
+    pdf.line(10, 270, 200, 270)
+    pdf.set_y(272)
+    pdf.set_font("Arial", "I", 9)
+    pdf.cell(0, 6, "KScouts Blockchain-Verified Certificate. Do not alter this document.", align="C")
 
-pdf.output(str(output_pdf))
-print(f"[OK] Certificate generated: {output_pdf.resolve()}")
+    pdf.output(str(output_pdf))
+    print(f"\n─────────────────────────────────────────────────────")
+    print(f"[OK] Certificate generated: {filename}")
 
-# ── 2. Compute SHA-256 ───────────────────────────────────────────
-with open(output_pdf, "rb") as f:
-    cert_bytes = f.read()
+    # ── 2. Compute SHA-256 ───────────────────────────────────────────
+    with open(output_pdf, "rb") as f:
+        cert_bytes = f.read()
 
-cert_hash_hex = hashlib.sha256(cert_bytes).hexdigest()
-print(f"\n[HASH] SHA-256: {cert_hash_hex}")
-print(f"       0x form:  0x{cert_hash_hex}")
+    cert_hash_hex = hashlib.sha256(cert_bytes).hexdigest()
+    print(f"[HASH] SHA-256: {cert_hash_hex}")
 
-# ── 3. Store hash on Hardhat blockchain ──────────────────────────
-try:
-    from web3 import Web3
-    from dotenv import load_dotenv
-    import os
+    # ── 3. Store hash on blockchain ──────────────────────────
+    if not w3 or not contract:
+        print("[WARN] Blockchain not connected. Hash NOT stored on-chain.")
+        return
 
-    load_dotenv()
+    try:
+        hash_bytes32 = bytes.fromhex(cert_hash_hex).ljust(32, b"\x00")[:32]
 
-    RPC_URL     = os.getenv("BLOCKCHAIN_RPC_URL", "http://127.0.0.1:8545")
-    PRIVATE_KEY = os.getenv("WALLET_PRIVATE_KEY",
-                            "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
+        # Check if already registered
+        already = contract.functions.verifyCertificate(hash_bytes32).call()
+        if already:
+            print("[INFO] Hash already registered on-chain — skipping transaction.")
+            return
 
-    abi_path = Path(__file__).parent.parent / "blockchain" / "abi" / "CertificateRegistry.json"
-    with open(abi_path) as f:
-        abi_data = json.load(f)
+        # Build & send transaction
+        tx = contract.functions.storeCertificateHash(hash_bytes32).build_transaction({
+            "from":     account.address,
+            "nonce":    w3.eth.get_transaction_count(account.address),
+            "gas":      200_000,
+            "maxFeePerGas": max(w3.eth.gas_price * 2, w3.to_wei("3", "gwei")),
+            "maxPriorityFeePerGas": w3.to_wei("2", "gwei")
+        })
+        signed  = w3.eth.account.sign_transaction(tx, private_key=account.key)
+        tx_hash = w3.eth.send_raw_transaction(signed.raw_transaction)
+        receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 
-    CONTRACT_ADDRESS = os.getenv("CONTRACT_ADDRESS", abi_data.get("address", ""))
+        print(f"[SUCCESS] Hash stored on-chain!")
+        print(f"  Tx hash : {tx_hash.hex()}")
+        print(f"  Block   : {receipt['blockNumber']}")
+    except Exception as e:
+        print(f"[ERROR] Blockchain error for {player_info['name']}: {e}")
+
+if __name__ == "__main__":
+    # --- DEMO PLAYERS CONFIGURATION ---
+    # Edit this list to generate unique certificates or add more!
+    players = [
+        {
+            "name": "Alex Test",
+            "email": "alex.test@kscouts.io",
+            "event": "KScouts U18 Regional Trials - Spring 2025",
+            "position": "Central Midfielder",
+            "rating": "87",
+            "file_suffix": "alex_cm"
+        },
+        {
+            "name": "Jordan Smith",
+            "email": "jordan.smith@example.com",
+            "event": "London Elite Youth Showcase",
+            "position": "Striker",
+            "rating": "91",
+            "file_suffix": "jordan_st"
+        },
+        {
+            "name": "Marcus Rashford",
+            "email": "marcus@demo.local",
+            "event": "Manchester United Academy Invitations",
+            "position": "Left Winger",
+            "rating": "94",
+            "file_suffix": "marcus_lw"
+        }
+    ]
+
+    # --- BLOCKCHAIN SETUP ---
+    env_path = Path(__file__).parent / ".env"
+    load_dotenv(dotenv_path=env_path)
+    RPC_URL = os.getenv("BLOCKCHAIN_RPC_URL", "https://eth-sepolia.g.alchemy.com/v2/7_ELPk4SmX3nUiwxWg4R2")
+    PRIVATE_KEY = os.getenv("WALLET_PRIVATE_KEY", "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
 
     w3 = Web3(Web3.HTTPProvider(RPC_URL))
-    if not w3.is_connected():
-        print(f"\n[WARN] Cannot connect to blockchain at {RPC_URL}")
-        print("       Make sure 'npx hardhat node' is running in the blockchain/ folder.")
-        sys.exit(1)
+    contract = None
+    account = None
 
-    print(f"\n[CHAIN] Connected to {RPC_URL}")
-    print(f"        Contract: {CONTRACT_ADDRESS}")
+    if w3.is_connected():
+        print(f"✅ Connected to blockchain at {RPC_URL}")
+        abi_path = Path(__file__).parent.parent / "blockchain" / "abi" / "CertificateRegistry.json"
+        try:
+            with open(abi_path) as f:
+                abi_data = json.load(f)
+            CONTRACT_ADDRESS = os.getenv("CONTRACT_ADDRESS", abi_data.get("address", ""))
+            contract = w3.eth.contract(address=Web3.to_checksum_address(CONTRACT_ADDRESS), abi=abi_data["abi"])
+            account = w3.eth.account.from_key(PRIVATE_KEY)
+            print(f"✅ Contract: {CONTRACT_ADDRESS}")
+            print(f"✅ Sender: {account.address}")
+        except Exception as e:
+            print(f"⚠️ Could not load contract/account: {e}")
+            w3 = None
+    else:
+        print(f"⚠️ Cannot connect to blockchain at {RPC_URL}. Generating PDFs only.")
 
-    contract = w3.eth.contract(
-        address=Web3.to_checksum_address(CONTRACT_ADDRESS),
-        abi=abi_data["abi"]
-    )
-
-    account = w3.eth.account.from_key(PRIVATE_KEY)
-    hash_bytes32 = bytes.fromhex(cert_hash_hex).ljust(32, b"\x00")[:32]
-
-    # Check if already registered
-    already = contract.functions.verifyCertificate(hash_bytes32).call()
-    if already:
-        print("\n[INFO] Hash already registered on-chain — no action needed.")
-        sys.exit(0)
-
-    # Build & send transaction
-    tx = contract.functions.storeCertificateHash(hash_bytes32).build_transaction({
-        "from":     account.address,
-        "nonce":    w3.eth.get_transaction_count(account.address),
-        "gas":      200_000,
-        "gasPrice": w3.to_wei("1", "gwei"),
-    })
-    signed  = w3.eth.account.sign_transaction(tx, private_key=PRIVATE_KEY)
-    tx_hash = w3.eth.send_raw_transaction(signed.raw_transaction)
-    receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
-
-    print(f"\n[SUCCESS] Hash stored on-chain!")
-    print(f"  Tx hash : {tx_hash.hex()}")
-    print(f"  Block   : {receipt['blockNumber']}")
-    print(f"  Gas used: {receipt['gasUsed']}")
-    print(f"\n[COPY THIS to verify on the KScouts site]")
-    print(f"  {cert_hash_hex}")
-
-except ImportError:
-    print("\n[WARN] web3/dotenv not available. Hash NOT stored on-chain.")
-    print(f"  Manual hash: {cert_hash_hex}")
-except Exception as e:
-    print(f"\n[ERROR] Blockchain error: {e}")
-    print(f"  Hash generated but NOT stored on-chain.")
-    print(f"  Hash: {cert_hash_hex}")
+    # --- GENERATE LOOP ---
+    for player in players:
+        generate_and_register(w3, contract, account, player)
+    
+    print("\n🎉 All demo certificates generated and anchored!")

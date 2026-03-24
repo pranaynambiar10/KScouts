@@ -5,7 +5,7 @@ Connects to the CertificateRegistry smart contract.
 Used by the certificate upload endpoint to store hashes on-chain.
 
 For LOCAL testing: uses Hardhat local node (http://127.0.0.1:8545)
-For PRODUCTION: set MUMBAI_RPC_URL and WALLET_PRIVATE_KEY in .env
+For PRODUCTION: set BLOCKCHAIN_RPC_URL (Sepolia) and WALLET_PRIVATE_KEY in .env
 """
 
 import os

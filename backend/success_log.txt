@@ -1,0 +1,26 @@
+﻿Γ£à Connected to blockchain at https://eth-sepolia.g.alchemy.com/v2/7_ELPk4SmX3nUiwxWg4R2
+Γ£à Contract: 0xD217817A4799331C623d5677aA9C2A9D7320F0C4
+Γ£à Sender: 0x1ad4be47f596f85199A97EE625d297BfDa55a613
+
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+[OK] Certificate generated: demo_certificate_alex_cm.pdf
+[HASH] SHA-256: aa47fc3219e24696d9a18b285f78fbe530e0316ae1a1c2d9b67a7bb771233e9c
+[SUCCESS] Hash stored on-chain!
+  Tx hash : 55bfb0101bda6955d0f65ca4548cf113ef8a7490a957a65ef94b4797a620cd34
+  Block   : 10513230
+
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+[OK] Certificate generated: demo_certificate_jordan_st.pdf
+[HASH] SHA-256: 92adc5fed069bb352547f858185444380f13eee183e3800a9c86d4dd80c759cf
+[SUCCESS] Hash stored on-chain!
+  Tx hash : 670ae4209a3532bf43a6aeb967147ee22018bca5c4ec3456726af198eba86827
+  Block   : 10513231
+
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+[OK] Certificate generated: demo_certificate_marcus_lw.pdf
+[HASH] SHA-256: 34d4223b08b13624e7cbfcf09a95d8bff48c74adbfbdcfe87dc9206fbe93e048
+[SUCCESS] Hash stored on-chain!
+  Tx hash : 9fcfb39b1e413697aab36c01a2e382c75a1986950f9d29f4b62675f747acbad8
+  Block   : 10513232
+
+≡ƒÄë All demo certificates generated and anchored!
